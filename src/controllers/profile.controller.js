@@ -1,4 +1,7 @@
 import { handleSuccess } from "../Handlers/responseHandlers.js";
+import { AppDataSource } from "../config/configDB.js";
+import { User } from "../entities/user.entity.js";
+import bcrypt from "bcrypt";
 
 export function getPublicProfile(req, res) {
   handleSuccess(res, 200, "Perfil público obtenido exitosamente", {
@@ -13,4 +16,47 @@ export function getPrivateProfile(req, res) {
     message: `¡Hola, ${user.email}! Este es tu perfil privado. Solo tú puedes verlo.`,
     userData: user,
   });
+}
+
+export async function patchProfile(req, res) {
+  const { email, password } = req.body;
+  const userId = req.user.id;
+
+  const userRepository = AppDataSource.getRepository(User);
+  const user = await userRepository.findOneBy({ id: userId });
+  if (!user) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+
+  if (email) user.email = email;
+  if (password) user.password = await bcrypt.hash(password, 10);
+
+  await userRepository.save(user);
+
+  return res.status(200).json({
+    message: `El perfil de ${user.email} ha sido actualizado.`,
+    updatedData: {
+      email: user.email,
+      password: password ? "********" : "No cambiado",
+    },
+  });
+}
+
+export async function deleteProfile(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    await userRepository.remove(user);
+
+    return res.status(200).json({ message: "Cuenta eliminada correctamente", userId });
+  } catch (error) {
+    return res.status(500).json({ message: "Error interno", error: error?.message });
+  }
 }
