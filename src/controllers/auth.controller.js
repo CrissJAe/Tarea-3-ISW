@@ -3,7 +3,6 @@ import { createUser } from "../services/user.service.js";
 import { handleSuccess, handleErrorClient, handleErrorServer } from "../Handlers/responseHandlers.js";
 
 import {
-  userQueryValidation,
   userBodyValidation,
 } from "../validations/user.validation.js";
 

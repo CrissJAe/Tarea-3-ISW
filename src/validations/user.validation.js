@@ -2,17 +2,6 @@
 
 import Joi from "joi";
 
-export const userQueryValidation = Joi.object({
-    id: Joi.number()
-        .integer()
-        .positive()
-        .messages({
-            "number.base": "El ID debe ser un numero.",
-            "number.integer": "El ID debe ser un numero entero.",
-            "number.positive": "El ID debe ser positivo.",
-        }),
-});
-
 export const userBodyValidation = Joi.object({
     email: Joi.string()
         .min(6)
